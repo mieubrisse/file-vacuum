@@ -3,6 +3,7 @@
 #   argv[0]     source directory to pull files from
 #   argv[1]     destination directory to put files into
 #   argv[2]     username@host combo
+#   argv[3]     either 'put' or 'get' if user wants to push or pull files to/from remote respectively
 
 # Changeable options
 if {[llength $argv] != 4} {
@@ -31,21 +32,35 @@ expect {
     "*onnected*" {}
     default exit
 }
-expect  "sftp>" 
-send    "cd $src_dir\r"
 set timeout 2
-expect {
-    "sftp>" {}
-    default exit
-}
-send    "lcd $target_dir\r"
-expect {
-    "sftp>" {}
-    default exit
-}
+expect  "sftp>" 
+# Sequence for uploading files to reote server
 if {$put_get == "put"} {
+    send    "lcd $src_dir\r"
+    expect {
+        "sftp>" {}
+        default exit
+    }
+    send    "cd $target_dir\r"
+    expect {
+        "sftp>" {}
+        default exit
+    }
+    set timeout -1
     send    "put *\r"
+# Sequence for pulling files from remote server
 } else {
+    send    "cd $src_dir\r"
+    expect {
+        "sftp>" {}
+        default exit
+    }
+    send    "lcd $target_dir\r"
+    expect {
+        "sftp>" {}
+        default exit
+    }
+    set timeout -1
     send    "get *\r"
 }
 expect {
